@@ -8,6 +8,7 @@
 import Foundation
 import Fluent
 import Vapor
+import FluentPostgresDriver
 
 final class MItem: Model, Content {
     
@@ -21,6 +22,9 @@ final class MItem: Model, Content {
     
     @Children(for: \.$item)
     var reviews: [Review]
+    
+    @Siblings(through: MoveActor.self, from: \.$moveId, to: \.$actor)
+    var actors: [Actor]
     
     init() {}
     

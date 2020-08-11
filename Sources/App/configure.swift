@@ -11,6 +11,8 @@ public func configure(_ app: Application) throws {
     
     app.migrations.add(CreateItem())
     app.migrations.add(CreateReview())
+    app.migrations.add(CreateActor())
+    app.migrations.add(CreateMoveActors())
 
     // register routes
     try routes(app)

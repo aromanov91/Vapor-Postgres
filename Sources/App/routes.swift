@@ -6,8 +6,31 @@ func routes(_ app: Application) throws {
 //        MItem.query(on: req.db).all()
 //    }
     
+    app.post("item",":itemId","actor",":actorId") { req -> EventLoopFuture<HTTPStatus> in
+        
+        let item = MItem.find(req.parameters.get("itemId"), on: req.db)
+            .unwrap(or: Abort(.notFound))
+        
+        let actor = Actor.find(req.parameters.get("actorId"), on: req.db)
+            .unwrap(or: Abort(.notFound))
+        
+        return item.and(actor).flatMap { (move, actor) in
+            move.$actors.attach(actor, on: req.db)
+        }.transform(to: .ok)
+    }
+    
+    app.get("actors") { req in
+        Actor.query(on: req.db).with(\.$items).all()
+    }
+    
+    app.post("actors") { req -> EventLoopFuture<Actor> in
+        
+        let actor = try req.content.decode(Actor.self)
+        return actor.create(on: req.db).map { actor }
+    }
+    
     app.get("item") { req in
-        MItem.query(on: req.db).with(\.$reviews).all()
+        MItem.query(on: req.db).with(\.$actors).with(\.$reviews).all()
     }
     
     app.get("item",":itemId") { req -> EventLoopFuture<MItem> in
